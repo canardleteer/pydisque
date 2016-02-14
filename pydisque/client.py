@@ -13,6 +13,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+# TODO (canardleteer): This class should be actually used.
 class Job(object):
 
     """Represents a Disque Job."""
@@ -118,6 +119,9 @@ class Client(object):
         for i, node in self.nodes.items():
             host, port = i.split(':')
             port = int(port)
+            # TODO (canardleteer): per issue #28, we should pass along more if
+            # not all options to the redis client from our client, this may 
+            # require us to tigheten up our redis lib requirements.
             redis_client = redis.Redis(host, port)
             try:
                 ret = redis_client.execute_command('HELLO')
