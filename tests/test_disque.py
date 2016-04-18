@@ -10,7 +10,7 @@ import json
 import time
 import random
 import six
-from pydisque.client import Client
+from pydisque.client import Client, QueuePausedException
 from redis.exceptions import ResponseError
 
 
@@ -194,7 +194,7 @@ class TestDisque(unittest.TestCase):
 
         try:
             job_id = self.client.add_job(queuename, test_job)
-        except ResponseError:
+        except QueuePausedException:
             pass
 
         # can we add a job again?
