@@ -1,7 +1,7 @@
 """Pydisque makes Disque easy to access in python."""
 
 import redis
-from redis.exceptions import ConnectionError
+from redis.exceptions import ConnectionError, ResponseError
 from functools import wraps
 try:
   # Python 3
@@ -69,7 +69,12 @@ class retry(object):
             while c <= self.retry_count:
                 try:
                     return fn(*args, **kwargs)
-                except:
+                except ResponseError as e:
+                    if e.message.find("PAUSED") > -1:
+                        raise QueuePausedException()
+                    else:
+                        raise e
+                except Exception as e:
                     logging.critical("retrying because of this exception - %s",
                                      c)
                     logging.exception("exception to retry ")
@@ -79,6 +84,12 @@ class retry(object):
 
         return wrapped_f
 
+class QueuePausedException(Exception):
+    """
+    Paused queue exception.
+    """
+    def __init__(self, *args, **kwargs):
+        Exception.__init__(self, *args, **kwargs)
 
 class Client(object):
 

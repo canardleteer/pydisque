@@ -21,7 +21,7 @@ import random
 import threading
 # logging.basicConfig(level=logging.DEBUG)
 
-from pydisque.client import Client
+from pydisque.client import Client, QueuePausedException
 
 # TODO: get rid of this requirement in the main lib
 from redis.exceptions import ResponseError
@@ -60,6 +60,9 @@ class producerThread(threading.Thread):
                 self._client.add_job(SHARED_QUEUE,
                                     "%d-%d" % (self._identifier, time.time()),
                                     replicate=1, timeout=100)
+            except QueuePausedException as e:
+                print("producer #%d: Queue was paused, skipping." %
+                      self._identifier)
             except ResponseError:
                 print(
                     "producer #%d: Queue paused, skipping." % self._identifier)
@@ -93,8 +96,8 @@ def main():
         ct = consumerThread(client, i)
         ct.start()
 
-    # pt = pausingThread(client, "0")
-    # pt.start()
+    pt = pausingThread(client, "0")
+    pt.start()
 
     try:
         while threading.activeCount() > 0:
