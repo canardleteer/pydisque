@@ -78,7 +78,7 @@ class pausingThread(threading.Thread):
     def run(self):
         while(self._running):
             self._client.pause(SHARED_QUEUE, kw_all=True)
-            napTimer = random.randint(0,10)
+            napTimer = random.randint(0,1)
             print("Pausing for: %ds" % napTimer)
             time.sleep(napTimer)
             self._client.pause(SHARED_QUEUE, kw_none=True)

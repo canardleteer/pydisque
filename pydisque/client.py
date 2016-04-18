@@ -69,11 +69,6 @@ class retry(object):
             while c <= self.retry_count:
                 try:
                     return fn(*args, **kwargs)
-                except ResponseError as e:
-                    if e.message.find("PAUSED") > -1:
-                        raise QueuePausedException()
-                    else:
-                        raise e
                 except Exception as e:
                     logging.critical("retrying because of this exception - %s",
                                      c)
@@ -159,6 +154,11 @@ class Client(object):
         """Execute a command on the connected server."""
         try:
             return self.get_connection().execute_command(*args, **kwargs)
+        except ResponseError as e:
+            if e.message.find("PAUSED") > -1:
+                raise QueuePausedException()
+            else:
+                raise
         except ConnectionError as e:
             logger.warn('trying to reconnect')
             self.connect()
